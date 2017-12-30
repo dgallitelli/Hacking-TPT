@@ -1,6 +1,6 @@
 # Mirai Botnet - Analysis and Simulation
 
-### Introduction
+## Introduction
 
 IoT devices are an ever-growing category of network devices, including printers, routers, security cameras, smart TVs, etc. Those devices have particularly susceptible to malware attacks and are becoming increasingly attractive targets for cybercriminals because of lack of security.
 
@@ -18,7 +18,7 @@ The most interesting aspect of this attack is that it was not performed by using
 
 
 
-### IoT Security Problem
+#### IoT Security Problem
 
 The more connected devices, the bigger the threat. Typically IoT devices are poorly secured (sometimes, not secured at all) and the interconnected nature of these smart objects means that every poorly secured device that is connected online, it potentially affects the security and resilience of the network.
 
@@ -38,7 +38,7 @@ The IoT Security problem has been analyzed also by the Open Web Application Secu
 
 
 
-### Botnets and DDoS
+#### Botnets and DDoS
 
 <!--
 Insert here some state-of-the-art on botnets and DDoS
@@ -47,29 +47,162 @@ Insert here some state-of-the-art on botnets and DDoS
 - Botnet for DoS : birth of DDoS
 -->
 
+## Mirai : malware analysis
 
-### Mirai : malware analysis
+<!-- https://www.youtube.com/watch?v=5fVBB84OiAo -->
+
+![mirai-components](./images/mirai-components.png)
 
 <!--
 Analysis on the malware part of Mirai
-- Analysis of telnet access
-- Analysis of hardcoded passwords
-- Analysis of scanning for other infectable devices (and avoidance of some hardcoded IPs)
-- Analysis of how it detected other malwares
+- Research [scanner.c]
+	- which features make a device infectable? - default user/pass cred on telnet login
+	- discovery for hosts with open telnet ports
+	- avoidance of some hardcoded IPs of authorities or internal network
+- Exploitation
+	- hardcoded credentials (60 User&Pwd)
+	- detection of other malwares
+- Coordination
+	- how it gets integrated in the botnet
+	- communication with the CommandAndControl server
 -->
 
+Mirai is a piece of malware that infects IoT devices and is used as a launch platform for DDoS attacks. Mirai’s **CnC** (command and control) and **ScanListen** is coded in Go, while its **bots** and **CodeLoader** are coded in C.
+
+Like most malware in this category, Mirai is built for two core purposes:
+
+- Locate and compromise IoT devices to further grow the botnet.
+- Launch DDoS attacks based on instructions received from a remote C&C.
+
+#### Research
+
+Mirai performs wide-ranging scans of IP addresses in order to locate under-secured IoT devices that could be remotely accessed via easily guessable login credentials via Telnet — usually factory default usernames and passwords (e.g., admin/admin).
+
+```
+< Insert code for scanning for targets >
+```
+
+Mirai also holds a hardcoded list of IPs that the bots are programmed to avoid when performing their IP scans. This list includes the US Postal Service, the Department of Defense, the Internet Assigned Numbers Authority (IANA) and IP ranges belonging to Hewlett-Packard and General Electric.
+
+```
+127.0.0.0/8               - Loopback
+0.0.0.0/8                 - Invalid address space
+3.0.0.0/8                 - General Electric (GE)
+15.0.0.0/7                - Hewlett-Packard (HP)
+56.0.0.0/8                - US Postal Service
+10.0.0.0/8                - Internal network
+192.168.0.0/16            - Internal network
+172.16.0.0/14             - Internal network
+100.64.0.0/10             - IANA NAT reserved
+169.254.0.0/16            - IANA NAT reserved
+198.18.0.0/15             - IANA Special use
+224.*.*.*+                - Multicast
+6.0.0.0/7                 - Department of Defense
+11.0.0.0/8                - Department of Defense
+21.0.0.0/8                - Department of Defense
+22.0.0.0/8                - Department of Defense
+26.0.0.0/8                - Department of Defense
+28.0.0.0/7                - Department of Defense
+30.0.0.0/8                - Department of Defense
+33.0.0.0/8                - Department of Defense
+55.0.0.0/8                - Department of Defense
+214.0.0.0/7               - Department of Defense
+```
+
+#### Exploitation
+
+Once a host with Telnet ports (*23* and *2323*) enabled, Mirai uses a brute force technique for guessing passwords: basically, it uses a dictionary attack based on a list of 60 hard-coded credentials contained in the *scanner.c* file.
+
+```
+< Insert code here for trying login in targets >
+```
+
+Once access has been granted, Mirai launched several killer scripts meant to eradicate other worms and Trojans, as well as prohibiting remote connection attempts of the hijacked device.
+
+It starts by closing all processes which use SSH, Telnet and HTTP:
+```
+killer_kill_by_port(htons(23))  // Kill telnet service
+killer_kill_by_port(htons(22))  // Kill SSH service
+killer_kill_by_port(htons(80))  // Kill HTTP service
+```
+
+Then, it locates and eradicates other botnet processes from memory, by means of a technique known as **memory scraping**:
+
+```
+#DEFINE TABLE_MEM_QBOT            // REPORT %S:%S
+#DEFINE TABLE_MEM_QBOT2           // HTTPFLOOD
+#DEFINE TABLE_MEM_QBOT3           // LOLNOGTFO
+#DEFINE TABLE_MEM_UPX             // \X58\X4D\X4E\X4E\X43\X50\X46\X22
+#DEFINE TABLE_MEM_ZOLLARD         // ZOLLARD
+```
+
+Finally, it kills the *Anime* software, a competing IoT-targeting malware:
+
+```
+table_unlock_val(TABLE_KILLER_ANIME);
+// If path contains ".anime" kill.
+if (util_stristr(realpath, rp_len - 1, table_retrieve_val(TABLE_KILLER_ANIME, NULL)) != -1)
+{
+    unlink(realpath);
+    kill(pid, 9);
+}
+table_lock_val(TABLE_KILLER_ANIME);
+```
+
+#### Coordination
+
+Once a target has been found, the information related to it are passed to the **ScanListen** server, which holds record of all infected devices now included in the botnet.
 
 
-### Mirai : DDoS
+
+## Mirai : DDoS
 
 <!--
-Analysis on the DDoS part of Mirai
-- how it gets integrated in the botnet
-- how it actually communicated with the "hive mind" to start the attack
+Analysis on the DDoS part of Mirai [attack.h]
+- how the target is defined
+- which attacks are launched
+	- 9+1 attack vectors [attack.h]
 -->
 
+Mirai’s attack function enables it to launch HTTP floods and various network (OSI layer 3-4) DDoS attacks. When attacking HTTP floods, Mirai bots hide behind the following default user-agents:
+
+```
+Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36
+Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36
+Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36
+Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36
+Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/601.7.7 (KHTML, like Gecko) Version/9.1.2 Safari/601.7.7
+```
 
 
 ### A Mirai simulation
 
-<!-- Attack simulation -->
+<!--
+Attack simulation
+- Define infrastructure [VMs for components, raspberry for bot]
+- Define attack vector - very interesting DNS water torture attack
+ -->
+
+ The attacker sets up a **ScanListen** server and a **CommandAndControl (CNC)** server. On the CnC server you can launch the first bot: it starts its Telnet scans (on ports *23* or *2323*) looking for infectable hosts. If one is found, this target is reported to the ScanListen server, reporting its IP address, the targeted ports and the working credentials for login. Once the ScanListen has its information, then it starts the **CodeLoader** component, which effectively infects the target, now becoming a bot.
+
+ Summarizing:
+
+ - The ScanListen and CnC are launched
+ - A first Bot is launched, looking for vulnerable hosts
+ - A first target is found
+ - The Bot reports information to the ScanListen (IP address, ports, credentials)
+ - The ScanListen issues a CodeLoader to inject code into the target
+ - The target becomes a zombie (bot)
+ - The Bot communicates with the CnC (port 21)
+ - The Bot starts looking for new hosts
+
+ ![mirai-infection](./images/mirai-infection.png)
+
+
+### Conclusion
+
+Mirai is a game changer. It changed the way DDoS attacks are launched, as well as showed how easily exploitable are internet-connected devices such as cameras, gates, or similar. Moreover, it is one of the first malwares which code is publicly available online, with a clear set of easily-followable instructions as well as *how-to guides* online.
+
+Many security experts are arguing about Mirai's longevity, some even saying to "*let it die by itself*". Even if Mirai were to disappear in the next months, up to 53 unique strands of Mirai have been found *in the wild* just in the two months following the source code release, each with different improvements, from changing the targeted port exploiting other infection vectors to using Domain Generation Algorithm (DGA) to evade domain blacklisting.
+
+Since IoT devices will only grow in the coming years, IoT security is something to pay close attention to.
