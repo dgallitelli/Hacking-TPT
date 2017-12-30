@@ -47,11 +47,22 @@ Insert here some state-of-the-art on botnets and DDoS
 - Botnet for DoS : birth of DDoS
 -->
 
+## Mirai : architecture
+
+![mirai-components](./images/mirai-components.png)
+
+Mirai is a piece of malware that infects IoT devices and is used as a launch platform for DDoS attacks. Its architecture includes:
+
+- a **Command And Control** (CnC) server, coded in Go and responsible for attack coordination by keeping track of the infected devices of the botnet;
+- a **ScanListen** server (*Report Server*), coded in Go and responsible for recevining information from the bots about the vulnerable targets and launching the *Malware Loader* which will infect the vulnerable device;
+- the actual **Malware Loader**, coded in C and responsible for the *exploitation* of the infected host by using it for the actual DDoS attack;
+- the infected devices, or **bots**.
+
+The analysis of the Mirai code will be divided into two parts: *Malware Analysis*, which focuses on the code resonsible for discovering, exploiting and coordinating the bots, and *DDoS attack*, which focuses on the attack vectors and methods for the DDoS attack.
+
 ## Mirai : malware analysis
 
 <!-- https://www.youtube.com/watch?v=5fVBB84OiAo -->
-
-![mirai-components](./images/mirai-components.png)
 
 <!--
 Analysis on the malware part of Mirai
@@ -67,12 +78,12 @@ Analysis on the malware part of Mirai
 	- communication with the CommandAndControl server
 -->
 
-Mirai is a piece of malware that infects IoT devices and is used as a launch platform for DDoS attacks. Mirai’s **CnC** (command and control) and **ScanListen** is coded in Go, while its **bots** and **CodeLoader** are coded in C.
-
 Like most malware in this category, Mirai is built for two core purposes:
 
 - Locate and compromise IoT devices to further grow the botnet.
 - Launch DDoS attacks based on instructions received from a remote C&C.
+
+The first step is critical: Mirai has to find as many devices as possible and aggregate them to the zombie network. 
 
 #### Research
 
@@ -155,7 +166,7 @@ Once a target has been found, the information related to it are passed to the **
 
 
 
-## Mirai : DDoS
+## Mirai : DDoS Attack
 
 <!--
 Analysis on the DDoS part of Mirai [attack.h]
