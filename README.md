@@ -174,8 +174,38 @@ Analysis on the DDoS part of Mirai [attack.h]
 - which attacks are launched
 	- 9+1 attack vectors [attack.h]
 -->
+Mirai offers offensive capabilities to launch DDoS attacks using UDP, TCP or HTTP protocols. They are launched by executing the Bot part of the source code, that runs on infected IoT devices. A build script ("build.sh") compiles bot source for different architectures. Bot was written entirely in C programming language. There are three modules running besides the main process: attack, killer and scanner. 
 
-Mirai’s attack function enables it to launch HTTP floods and various network (OSI layer 3-4) DDoS attacks. When attacking HTTP floods, Mirai bots hide behind the following default user-agents:
+The Attack module is the one that parses command when received and launches DoS attack. There are ten attack methods the CNC server sends to the botnet for executing a DDoS against its target, implemented in ten different functions. Module decides which function to call based on command issued, and stops its execution once duration time expires. In fact the command given by the server specifies the type of DDoS attack, the IP/subnet of the target, and the duration of the attack.
+
+The attacks supported over the UDP protocol, carried out by an unsuspected IoT device, are implemented by the file attack_udp.c :
+- Generic Routing Encapsulation (GRE) Attack;
+- TSource Query — Reflective Denial of Service (bandwidth amplification);
+- DNS Flood via Query of type A record (mapping hostname to IP address);
+- Flooding of random bytes via plain packets.
+
+In the same way there are several attack types supported via TCP protocol implemented by attack_tcp.c:
+- SYN Flood
+- ACK Flood
+- PSH Flood
+
+In addition to these malformed UDP/TCP packets floods, Mirai bots also support Dos over http, within attack_app.c file. Once the connection with the target device is established and as long as it is held, the bot will send HTTP GET or POST requests, inlcuding cookies and random payload data.
+
+```
+#define ATK_VEC_UDP        0  /* Straight up UDP flood */
+#define ATK_VEC_VSE        1  /* Valve Source Engine query flood */
+#define ATK_VEC_DNS        2  /* DNS water torture */
+#define ATK_VEC_SYN        3  /* SYN flood with options */
+#define ATK_VEC_ACK        4  /* ACK flood */
+#define ATK_VEC_STOMP      5  /* ACK flood to bypass mitigation devices */
+#define ATK_VEC_GREIP      6  /* GRE IP flood */
+#define ATK_VEC_GREETH     7  /* GRE Ethernet flood */
+//#define ATK_VEC_PROXY      8  /* Proxy knockback connection */
+#define ATK_VEC_UDP_PLAIN  9  /* Plain UDP flood optimized for speed */
+#define ATK_VEC_HTTP       10 /* HTTP layer 7 flood */
+```
+
+When attacking HTTP floods, Mirai bots hide behind the following default user-agents:
 
 ```
 Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36
@@ -217,3 +247,22 @@ Mirai is a game changer. It changed the way DDoS attacks are launched, as well a
 Many security experts are arguing about Mirai's longevity, some even saying to "*let it die by itself*". Even if Mirai were to disappear in the next months, up to 53 unique strands of Mirai have been found *in the wild* just in the two months following the source code release, each with different improvements, from changing the targeted port exploiting other infection vectors to using Domain Generation Algorithm (DGA) to evade domain blacklisting.
 
 Since IoT devices will only grow in the coming years, IoT security is something to pay close attention to.
+
+### Bibliography
+C. Kolias, G. Kambourakis, A. Stavrou, J.Voas,”DDoS in the IoT: Mirai and Other Botnets”, IEEE Computer Society, 2017
+
+M. Antonakakis, T. April, M. Bailey, M. Bernhard, E. Bursztein, J. Cochran, Z. Durumeric, J. A. Halderman, L. Invernizzi, M. Kallitsis, D. Kumar, C. Lever, Z. Ma, J. Mason, D. Menscher, C. Seaman, Nick Sullivan, K. Thomas, Y. Zhou, “Understanding the Mirai Botnet”, Proceedings of the 26th USENIX Security Symposium,  August 16–18  2017 ,Vancouver ( Canada)
+
+B. Herzberg, D. Bekerman, I. Zeifman, “Breaking Down Mirai: An IOT DDoS Botnet Analysis”,
+Blog (https://WWW.INCAPSULA.COM/BLOG/CATEGORY/BLOG), October 2016
+
+R. Graham, “Mirai and IoT Botnet Analysis”, RSA Conference 2017, February 13-17, San Francisco
+
+S. Jasek, “Mirai botnet: intro to discussion”, OWASP, Krakow, 2016/11/15 
+
+H. Sinanovi´c, S. Mrdovic, “Analysis of Mirai Malicious Software”, University of Sarajevo
+
+N. B. Said, F. Biondi, V. Bontchev, O. Decourbe,T. Given-Wilson, A. Legay, J. Quilbeuf,“Detection of Mirai by Syntactic and Semantic Analysis”, HAL Id: hal-01629040, https://hal.inria.fr/hal-01629040, 5 Nov 2017
+
+B. Botticelli, “IoT Honeypots: State of the Art”, Seminar in Advanced Topics in Computer Science, Università di Roma Sapienza, September 2, 2017
+
