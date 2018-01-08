@@ -40,9 +40,43 @@ The IoT Security problem has been analyzed also by the Open Web Application Secu
 
 #### Botnets and DDoS
 
+A **denial-of-service attack (DoS attack)** is a cyber-attack where the perpetrator seeks to make a machine or network resource unavailable to its intended users by temporarily or indefinitely disrupting services of a host connected to the Internet. Denial of service is typically accomplished by flooding the targeted machine or resource with superfluous requests in an attempt to overload systems and prevent some or all legitimate requests from being fulfilled.
+In a **distributed denial-of-service attack (DDoS attack)**, the incoming traffic flooding the victim originates from many different sources. This effectively makes it impossible to stop the attack simply by blocking a single source.                     
+From these definitions, one can easyly understand that **Distributed Denial of Service (DDoS) attacks**  constitute one of the major threats and among the hardest security problems in today’s Internet and thier impact can be proportionally severe.  On the   
+
+![OWASP_IOT.png](./images/DDoS.jpg)
+##### Types of DDoS attacks       
+DDoS attactks can be implemented using three main stategies:                          
+- **Traffic attacks**: Traffic flooding attacks send a huge volume of TCP, UDP and ICPM packets to the target. Legitimate requests get lost and these attacks may be accompanied by malware exploitation.
+- **Bandwidth attacks**: This DDos attack overloads the target with massive amounts of junk data. This results in a loss of network bandwidth and equipment resources and can lead to a complete denial of service.
+- **Application attacks**: Application-layer data messages can deplete resources in the application layer, leaving the target's system services unavailable.           
+Different types of attacks fall into categories based on the traffic quantity and the vulnerabilities being targeted.       
+Here is a list of the most popular types of DDoS attacks:
+![OWASP_IOT.png](./images/DDOStYPES.PNG)                    
+##### What is a Botnet?         
+Occasionally referred to as a **“zombie army,”** a **botnet** is a group of hijacked Internet-connected devices, each injected with malware used to control it from a remote location without the knowledge of the device’s rightful owner. From the point of view of hackers, these botnet devices are computing resources that can be used for any type of malicious purposes—most commonly for spam or DDoS attacks.       
+##### How is a botnet controlled?           
+A core characteristic of a botnet is the ability to receive updated instructions from the bot herder. The ability to communicate with each bot in the network allows the attacker to alternate attack vectors, change the targeted IP address, terminate an attack, and other customized actions. Botnet designs vary, but the control structures can be broken down into two general categories:      
+1) **The client/server botnet model**     
+These botnets operate through Internet Relay Chat networks, domains, or websites. Infected clients access a predetermined location and await incoming commands from the server. The bot herder sends commands to the server, which relays them to the clients. Clients execute the commands and report their results back to the bot herder.
+2) **The peer-to-peer botnet model**         
+To circumvent the vulnerabilities of the client/server model, botnets have more recently been designed using components of decentralized peer-to-peer filesharing. Embedding the control structure inside the botnet eliminates the single point-of-failure present in a botnet with a centralized server, making mitigation efforts more difficult. P2P bots can be both clients and command centers, working hand-in-hand with their neighboring nodes to propagate data.
+##### How do IoT devices become a botnet?     
+No one does their Internet banking through the wireless CCTV camera they put in the backyard to watch the bird feeder, but that doesn't mean the device is incapable of making the necessary network requests. The power of IoT devices coupled with weak or poorly configured security creates an opening for botnet malware to recruit new bots into the collective. An uptick in IoT devices has resulted in a new landscape for DDoS attacks, as many devices are poorly configured and vulnerable.
+If an IoT device’s vulnerability is hardcoded into firmware, updates are more difficult. To mitigate risk, IoT devices with outdated firmware should be updated as default credentials commonly remain unchanged from the initial installation of the device. Many discount manufacturers of hardware are not incentivized to make their devices more secure, making the vulnerability posed from botnet malware to IoT devices remain an unsolved security risk.            
+                                                  
+Just to have an idea of the consequences of theses attacks,  remeber the famous 
+ **"Dyn Botnet DDos cyberattack"** that took place on October 21, 2016. The victim was the servers of Dyn,
+ a company that controls much of the internet’s domain name system (DNS) infrastructure.
+ It remained under sustained assault for most of the day, bringing down
+ sites including Twitter, the Guardian, Netflix, Reddit, Paypal, CNN and many others in Europe and the US.
+   
+
+
 <!--
 Insert here some state-of-the-art on botnets and DDoS
-- What is DoS attack and its types
+
+- What is DDoS attack and its types
 - What is a botnet
 - Botnet for DoS : birth of DDoS
 -->
