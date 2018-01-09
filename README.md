@@ -1,3 +1,9 @@
+![paristech](./images/paristech.png)
+
+# SR2I203 Hacking : méthodes et pratiques
+
+Davide GALLITELLI Carlotta CASTELLUCCIO Axel FOTSO
+
 # Mirai Botnet - Analysis and Simulation
 
 ## Introduction
@@ -64,13 +70,13 @@ To circumvent the vulnerabilities of the client/server model, botnets have more 
 ##### How do IoT devices become a botnet?     
 No one does their Internet banking through the wireless CCTV camera they put in the backyard to watch the bird feeder, but that doesn't mean the device is incapable of making the necessary network requests. The power of IoT devices coupled with weak or poorly configured security creates an opening for botnet malware to recruit new bots into the collective. An uptick in IoT devices has resulted in a new landscape for DDoS attacks, as many devices are poorly configured and vulnerable.
 If an IoT device’s vulnerability is hardcoded into firmware, updates are more difficult. To mitigate risk, IoT devices with outdated firmware should be updated as default credentials commonly remain unchanged from the initial installation of the device. Many discount manufacturers of hardware are not incentivized to make their devices more secure, making the vulnerability posed from botnet malware to IoT devices remain an unsolved security risk.            
-                                                  
-Just to have an idea of the consequences of theses attacks,  remeber the famous 
+
+Just to have an idea of the consequences of theses attacks,  remeber the famous
  **"Dyn Botnet DDos cyberattack"** that took place on October 21, 2016. The victim was the servers of Dyn,
  a company that controls much of the internet’s domain name system (DNS) infrastructure.
  It remained under sustained assault for most of the day, bringing down
  sites including Twitter, the Guardian, Netflix, Reddit, Paypal, CNN and many others in Europe and the US.
-   
+
 
 
 <!--
@@ -80,6 +86,7 @@ Insert here some state-of-the-art on botnets and DDoS
 - What is a botnet
 - Botnet for DoS : birth of DDoS
 -->
+
 
 ## Mirai : architecture
 
@@ -117,7 +124,7 @@ Like most malware in this category, Mirai is built for two core purposes:
 - Locate and compromise IoT devices to further grow the botnet.
 - Launch DDoS attacks based on instructions received from a remote C&C.
 
-The first step is critical: Mirai has to find as many devices as possible and aggregate them to the zombie network. 
+The first step is critical: Mirai has to find as many devices as possible and aggregate them to the zombie network.
 
 #### Research
 
@@ -208,7 +215,7 @@ Analysis on the DDoS part of Mirai [attack.h]
 - which attacks are launched
 	- 9+1 attack vectors [attack.h]
 -->
-Mirai offers offensive capabilities to launch DDoS attacks using UDP, TCP or HTTP protocols. They are launched by executing the Bot part of the source code, that runs on infected IoT devices. A build script ("build.sh") compiles bot source for different architectures. Bot was written entirely in C programming language. There are three modules running besides the main process: attack, killer and scanner. 
+Mirai offers offensive capabilities to launch DDoS attacks using UDP, TCP or HTTP protocols. They are launched by executing the Bot part of the source code, that runs on infected IoT devices. A build script ("build.sh") compiles bot source for different architectures. Bot was written entirely in C programming language. There are three modules running besides the main process: attack, killer and scanner.
 
 The Attack module is the one that parses command when received and launches DoS attack. There are ten attack methods the CNC server sends to the botnet for executing a DDoS against its target, implemented in ten different functions. Module decides which function to call based on command issued, and stops its execution once duration time expires. In fact the command given by the server specifies the type of DDoS attack, the IP/subnet of the target, and the duration of the attack.
 
@@ -292,11 +299,10 @@ Blog (https://WWW.INCAPSULA.COM/BLOG/CATEGORY/BLOG), October 2016
 
 R. Graham, “Mirai and IoT Botnet Analysis”, RSA Conference 2017, February 13-17, San Francisco
 
-S. Jasek, “Mirai botnet: intro to discussion”, OWASP, Krakow, 2016/11/15 
+S. Jasek, “Mirai botnet: intro to discussion”, OWASP, Krakow, 2016/11/15
 
 H. Sinanovi´c, S. Mrdovic, “Analysis of Mirai Malicious Software”, University of Sarajevo
 
 N. B. Said, F. Biondi, V. Bontchev, O. Decourbe,T. Given-Wilson, A. Legay, J. Quilbeuf,“Detection of Mirai by Syntactic and Semantic Analysis”, HAL Id: hal-01629040, https://hal.inria.fr/hal-01629040, 5 Nov 2017
 
 B. Botticelli, “IoT Honeypots: State of the Art”, Seminar in Advanced Topics in Computer Science, Università di Roma Sapienza, September 2, 2017
-
