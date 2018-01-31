@@ -1,0 +1,65 @@
+# author: GALLITELLI Davide
+# project: SR2I 203 - Botnet Mirai : Simulation et mise en oeuvre
+# MIRAI COMPOSER
+version: '2'
+
+services:
+    # COMPILE ALL THE FILES IN THE MIRAI SOLUTION
+    # compiler:
+    #     container_name: "mirai_compiler"
+    #     build: ./Dockerfile-Compiler
+
+    # CNC CONFIGURATION
+    cnc:
+        container_name: "mirai_cnc"
+        build:
+            context: .
+            dockerfile: ./Dockerfile-CNC
+        networks:
+            vpcbr:
+                ipv4_address: 172.25.0.2
+
+    # SCANLISTEN CONFIGURATION
+    scanlisten:
+        container_name: "mirai_scan"
+        build:
+            context: .
+            dockerfile: ./Dockerfile-SCAN
+        networks:
+            vpcbr:
+                ipv4_address: 172.25.0.3
+
+    # LOADER CONFIGURATION
+    loader:
+        container_name: "mirai_loader"
+        build:
+            context: .
+            dockerfile: ./Dockerfile-LOAD
+        networks:
+            vpcbr:
+                ipv4_address: 172.25.0.4
+
+    # BOT CONFIGURATION
+    bot:
+        container_name: "mirai_bot"
+        build:
+            context: .
+            dockerfile: ./Dockerfile-BOT
+        networks:
+            vpcbr:
+                ipv4_address: "172.25.0.5"
+
+    # TARGETS CONFIGURATION
+    # TODO: An idea is to use other containers as targets, avoiding the use of the rPi
+    # TODO: Can I run multiple instances of this "Target" container at once?
+    # target:
+    #     container_name: "mirai_target"
+    #     dockerfile: ./Dockerfile-TRGT
+
+networks:
+    vpcbr:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 172.25.0.0/24
+                  gateway: 172.25.0.1

@@ -1,0 +1,6 @@
+FROM debian:jessie-slim
+ADD ./src/ /src/
+RUN apt-get -y update \
+	&& apt-get upgrade -y \
+	&& apt-get install -y wget bzip2 nano
+CMD ['sh /src/scripts/cross-compile.sh']

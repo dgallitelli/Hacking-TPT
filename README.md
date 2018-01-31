@@ -281,6 +281,17 @@ Attack simulation
  ![mirai-infection](./images/mirai-infection.png)
 
 
+#### Simulation: infrastructure overview
+
+The whole infrastructure for the attack, both the Mirai components and the its targets are *Docker containers* and built with *Docker-Compose*. This allows us to have a better control over the internal network of containers, and even perform off-line attacks. The containers used are all based on a _Debian Jessie-Slim_ distribution, and are the following:
+
+- 1 **CNC**, the CommandAndControl server, which also holds the database
+- 1 **SCANLISTEN** server, to receive the reports from the bots
+- 1 **LOADER**, for malware injection
+- 1 **initial bot**, basically a "Patient Zero" for the infection
+- x **targets**, simple Jessie-Slim containers with SSH enabled with default password [root@localhost : root]
+
+
 ### Conclusion
 
 Mirai is a game changer. It changed the way DDoS attacks are launched, as well as showed how easily exploitable are internet-connected devices such as cameras, gates, or similar. Moreover, it is one of the first malwares which code is publicly available online, with a clear set of easily-followable instructions as well as *how-to guides* online.
