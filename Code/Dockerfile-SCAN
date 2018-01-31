@@ -1,5 +1,5 @@
 FROM debian:jessie-slim
-ADD ./src/mirai/debug/scanListen /scanListen
+ADD ./source/mirai/debug/scanListen /scanListen
 RUN apt-get -y update
 #	&& apt-get upgrade -y \
 #	&& apt-get install -y wget bzip2 nano golang

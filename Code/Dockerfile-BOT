@@ -1,5 +1,5 @@
 FROM debian:jessie-slim
-ADD ./src/mirai/debug/mirai.dbg /bot
+ADD ./source/mirai/debug/mirai.dbg /bot
 RUN apt-get -y update \
 	&& apt-get upgrade -y \
 	&& apt-get install -y wget bzip2 nano\
