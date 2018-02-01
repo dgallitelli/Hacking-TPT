@@ -28,6 +28,8 @@ func main() {
         return
     }
 
+    fmt.Println("# Accepting clients ... #")
+
     go func() {
         for {
             conn, err := api.Accept()

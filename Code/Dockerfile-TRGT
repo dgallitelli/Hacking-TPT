@@ -2,5 +2,5 @@ FROM debian:jessie-slim
 ADD ./source/loader/loader /loader
 RUN apt-get -y update \
 	&& apt-get upgrade -y \
-	&& apt-get install -y wget nano ssh
+	&& apt-get install -y wget nano sshd telnet
 EXPOSE 22

@@ -7,7 +7,7 @@ echo "### LOADER IS BUILT. ###"
 
 echo "### BUILDING MIRAI WITH OPTIONS $1 $2"
 cd ./source/mirai/
-./build.sh $1 $2
+./build.sh debug telnet
 cd ../..
 echo "### MIRAI IS BUILT. ###"
 

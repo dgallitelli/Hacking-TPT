@@ -12,6 +12,8 @@ services:
     # CNC CONFIGURATION
     cnc:
         container_name: "mirai_cnc"
+        hostname: cnc
+        domainname: mirai.com
         build:
             context: .
             dockerfile: ./Dockerfile-CNC
@@ -22,6 +24,8 @@ services:
     # SCANLISTEN CONFIGURATION
     scanlisten:
         container_name: "mirai_scan"
+        hostname: scan
+        domainname: mirai.com
         build:
             context: .
             dockerfile: ./Dockerfile-SCAN
@@ -32,6 +36,8 @@ services:
     # LOADER CONFIGURATION
     loader:
         container_name: "mirai_loader"
+        hostname: loader
+        domainname: mirai.com
         build:
             context: .
             dockerfile: ./Dockerfile-LOAD
@@ -42,6 +48,8 @@ services:
     # BOT CONFIGURATION
     bot:
         container_name: "mirai_bot"
+        hostname: bot
+        domainname: mirai.com
         build:
             context: .
             dockerfile: ./Dockerfile-BOT
@@ -55,6 +63,16 @@ services:
     # target:
     #     container_name: "mirai_target"
     #     dockerfile: ./Dockerfile-TRGT
+
+    # TEST CONFIGURATION
+    test:
+        container_name: "mirai_test"
+        hostname: test
+        domainname: mirai.com
+        image: debian:jessie-slim
+        networks:
+            vpcbr:
+                ipv4_address: 172.25.0.69
 
 networks:
     vpcbr:

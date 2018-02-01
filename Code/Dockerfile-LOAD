@@ -1,6 +1,7 @@
 FROM debian:jessie-slim
 ADD ./source/loader/loader /loader
+ADD ./source/loader/bins/ /bins/
 RUN apt-get -y update \
 	&& apt-get upgrade -y \
-	&& apt-get install -y wget bzip2 nano
+	&& apt-get install -y wget bzip2 nano telnet
 CMD /loader
