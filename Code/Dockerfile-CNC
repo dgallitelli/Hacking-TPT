@@ -10,6 +10,8 @@ RUN apt-get -y update \
 	&& echo mysql-server mysql-server/root_password_again password root | debconf-set-selections \
 	&& apt-get install -y mysql-server -o pkg::Options::="--force-confdef" -o pkg::Options::="--force-confold" --fix-missing \
 	&& apt-get install -y mysql-client \
-	&& mysql -u root -p"root" < /db.sql
+	&& mysql -u root -p"root" < /db.sql \
+	&& echo "127.0.0.1 cnc.mirai.com cnc" >> /etc/hosts\
+	&& echo "172.25.0.4 load.mirai.com load" >> /etc/hosts
 CMD service mysql start && /cnc
 EXPOSE 23 101 3306

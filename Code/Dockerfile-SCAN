@@ -1,7 +1,9 @@
 FROM debian:jessie-slim
 ADD ./source/mirai/debug/scanListen /scanListen
-RUN apt-get -y update
-#	&& apt-get upgrade -y \
+RUN apt-get -y update\
+	&& apt-get upgrade -y \
+	&& echo "172.25.0.2 cnc.mirai.com cnc" >> /etc/hosts \
+	&& echo "172.25.0.4 load.mirai.com load" >> /etc/hosts
 #	&& apt-get install -y wget bzip2 nano golang telnet
 CMD /scanListen
 EXPOSE 48101

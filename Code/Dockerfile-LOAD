@@ -3,5 +3,7 @@ ADD ./source/loader/loader /loader
 ADD ./source/loader/bins/ /bins/
 RUN apt-get -y update \
 	&& apt-get upgrade -y \
-	&& apt-get install -y wget bzip2 nano telnet
+	&& apt-get install -y wget bzip2 nano telnet \
+	&& echo "172.25.0.2 cnc.mirai.com cnc" >> /etc/hosts \
+	&& echo "127.0.0.1 load.mirai.com load" >> /etc/hosts
 CMD /loader
