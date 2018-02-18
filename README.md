@@ -2,7 +2,9 @@
 
 # SR2I203 Hacking : méthodes et pratiques
 
-Davide GALLITELLI Carlotta CASTELLUCCIO Axel FOTSO
+- Davide GALLITELLI
+- Carlotta CASTELLUCCIO
+- Axel FOTSO
 
 # Mirai Botnet - Analysis and Simulation
 
