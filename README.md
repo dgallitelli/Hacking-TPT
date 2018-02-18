@@ -6,6 +6,8 @@
 - Carlotta CASTELLUCCIO
 - Axel FOTSO
 
+--------
+
 # Mirai Botnet - Analysis and Simulation
 
 ## Introduction
@@ -73,21 +75,13 @@ To circumvent the vulnerabilities of the client/server model, botnets have more 
 No one does their Internet banking through the wireless CCTV camera they put in the backyard to watch the bird feeder, but that doesn't mean the device is incapable of making the necessary network requests. The power of IoT devices coupled with weak or poorly configured security creates an opening for botnet malware to recruit new bots into the collective. An uptick in IoT devices has resulted in a new landscape for DDoS attacks, as many devices are poorly configured and vulnerable.
 If an IoT device’s vulnerability is hardcoded into firmware, updates are more difficult. To mitigate risk, IoT devices with outdated firmware should be updated as default credentials commonly remain unchanged from the initial installation of the device. Many discount manufacturers of hardware are not incentivized to make their devices more secure, making the vulnerability posed from botnet malware to IoT devices remain an unsolved security risk.            
 
-Just to have an idea of the consequences of theses attacks,  remeber the famous
- **"Dyn Botnet DDos cyberattack"** that took place on October 21, 2016. The victim was the servers of Dyn,
- a company that controls much of the internet’s domain name system (DNS) infrastructure.
- It remained under sustained assault for most of the day, bringing down
- sites including Twitter, the Guardian, Netflix, Reddit, Paypal, CNN and many others in Europe and the US.
+Just to have an idea of the consequences of these attacks,  remeber the famous
+**"Dyn Botnet DDos cyberattack"** that took place on October 21, 2016. The victim was the servers of Dyn,
+a company that controls much of the internet’s domain name system (DNS) infrastructure.
+It remained under sustained assault for most of the day, bringing down
+sites including Twitter, the Guardian, Netflix, Reddit, Paypal, CNN and many others in Europe and the US.
 
-
-
-<!--
-Insert here some state-of-the-art on botnets and DDoS
-
-- What is DDoS attack and its types
-- What is a botnet
-- Botnet for DoS : birth of DDoS
--->
+---------
 
 
 ## Mirai : architecture
@@ -394,6 +388,7 @@ Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrom
 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/601.7.7 (KHTML, like Gecko) Version/9.1.2 Safari/601.7.7
 ```
 
+-----------
 
 ### A Mirai simulation
 
@@ -432,6 +427,7 @@ The whole infrastructure for the attack, both the Mirai components and the its t
 
 Being able to launch all the components with the Docker infrastructure and through a Docker-Compose script allows for great scalability and immediate launch of the service. This makes it pretty easy to launch a quick test without any major modification to the code of the single components of the bot. A simple `docker-compose up --build` in the `Code/source/` directory is sufficient to build the entire infrastructure and run immediately tests in the contained network.
 
+--------
 
 ### Conclusion
 
@@ -440,6 +436,8 @@ Mirai is a game changer. It changed the way DDoS attacks are launched, as well a
 Many security experts are arguing about Mirai's longevity, some even saying to "*let it die by itself*". Even if Mirai were to disappear in the next months, up to 53 unique strands of Mirai have been found *in the wild* just in the two months following the source code release, each with different improvements, from changing the targeted port exploiting other infection vectors to using Domain Generation Algorithm (DGA) to evade domain blacklisting.
 
 Since IoT devices will only grow in the coming years, IoT security is something to pay close attention to.
+
+----------
 
 ### Bibliography
 C. Kolias, G. Kambourakis, A. Stavrou, J.Voas,”DDoS in the IoT: Mirai and Other Botnets”, IEEE Computer Society, 2017
