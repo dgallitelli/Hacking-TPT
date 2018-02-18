@@ -52,11 +52,11 @@ The IoT Security problem has been analyzed also by the Open Web Application Secu
 
 A **denial-of-service attack (DoS attack)** is a cyber-attack where the perpetrator seeks to make a machine or network resource unavailable to its intended users by temporarily or indefinitely disrupting services of a host connected to the Internet. Denial of service is typically accomplished by flooding the targeted machine or resource with superfluous requests in an attempt to overload systems and prevent some or all legitimate requests from being fulfilled.
 In a **distributed denial-of-service attack (DDoS attack)**, the incoming traffic flooding the victim originates from many different sources. This effectively makes it impossible to stop the attack simply by blocking a single source.                     
-From these definitions, one can easyly understand that **Distributed Denial of Service (DDoS) attacks**  constitute one of the major threats and among the hardest security problems in today’s Internet and thier impact can be proportionally severe.  On the   
+From these definitions, one can easyly understand that **Distributed Denial of Service (DDoS) attacks**  constitute one of the major threats and among the hardest security problems in today’s Internet and thier impact can be proportionally severe.    
 
 ![OWASP_IOT.png](./images/DDoS.jpg)
 ##### Types of DDoS attacks       
-DDoS attactks can be implemented using three main stategies:                          
+DDoS attacks can be implemented using three main stategies:                          
 - **Traffic attacks**: Traffic flooding attacks send a huge volume of TCP, UDP and ICPM packets to the target. Legitimate requests get lost and these attacks may be accompanied by malware exploitation.
 - **Bandwidth attacks**: This DDos attack overloads the target with massive amounts of junk data. This results in a loss of network bandwidth and equipment resources and can lead to a complete denial of service.
 - **Application attacks**: Application-layer data messages can deplete resources in the application layer, leaving the target's system services unavailable.           
@@ -64,7 +64,7 @@ Different types of attacks fall into categories based on the traffic quantity an
 Here is a list of the most popular types of DDoS attacks:
 ![OWASP_IOT.png](./images/DDOStYPES.PNG)                    
 ##### What is a Botnet?         
-Occasionally referred to as a **“zombie army,”** a **botnet** is a group of hijacked Internet-connected devices, each injected with malware used to control it from a remote location without the knowledge of the device’s rightful owner. From the point of view of hackers, these botnet devices are computing resources that can be used for any type of malicious purposes—most commonly for spam or DDoS attacks.       
+Occasionally referred to as a **“zombie army,”** a **botnet** is a group of hijacked Internet-connected devices, each injected with malware used to control it from a remote location without the knowledge of the device’s rightful owner. From the point of view of hackers, these botnet devices are computing resources that can be used for any type of malicious purposes — most commonly for spam or DDoS attacks.       
 ##### How is a botnet controlled?           
 A core characteristic of a botnet is the ability to receive updated instructions from the bot herder. The ability to communicate with each bot in the network allows the attacker to alternate attack vectors, change the targeted IP address, terminate an attack, and other customized actions. Botnet designs vary, but the control structures can be broken down into two general categories:      
 1) **The client/server botnet model**     
@@ -186,6 +186,7 @@ Mirai also holds a hardcoded list of IPs that the bots are programmed to avoid w
 55.0.0.0/8                - Department of Defense
 214.0.0.0/7               - Department of Defense
 ```
+This list is interesting, as it offers a glimpse into the psyche of the code’s authors. On the one hand, it exposes concerns of drawing attention to his activities. On the other hand, the content list is fairly naïve, the sort of thing you would expect from someone who learned about cyber security from the popular media, not a professional cyber criminal.
 
 #### Exploitation
 
@@ -390,6 +391,47 @@ Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/601.7.7 (KHTML, like
 
 -----------
 
+Once discovered the targets of the attack and defined the different attack vectors for flooding, the code written in attack.c is responsible for handling the attack request initiated by the CNC server. It parses the shell command provided via the Admin interface, formats & builds the command(s), parses the target(s) (attack_parse function), and sends the command down to the appropriate bots (calling attack_start). 
+
+```
+void attack_start(int duration, ATTACK_VECTOR vector, uint8_t targs_len, struct attack_target *targs, uint8_t opts_len, struct attack_option *opts)
+{
+    int pid1, pid2;
+
+    pid1 = fork();
+    if (pid1 == -1 || pid1 > 0)
+        return;
+
+    pid2 = fork();
+    if (pid2 == -1)
+        exit(0);
+    else if (pid2 == 0)
+    {
+        sleep(duration);
+        kill(getppid(), 9);
+        exit(0);
+    }
+    else
+    {
+        int i;
+
+        for (i = 0; i < methods_len; i++)
+        {
+            if (methods[i]->vector == vector)
+            {
+#ifdef DEBUG
+                printf("[attack] Starting attack...\n");
+#endif
+                methods[i]->func(targs_len, targs, opts_len, opts);
+                break;
+            }
+        }
+
+        //just bail if the function returns
+        exit(0);
+    }
+}
+```
 ### A Mirai simulation
 
 <!--
@@ -416,7 +458,7 @@ Attack simulation
 
 #### Simulation: infrastructure overview
 
-The whole infrastructure for the attack, both the Mirai components and the its targets are *Docker containers* and built with *Docker-Compose*. This allows us to have a better control over the internal network of containers, and even perform off-line attacks. The containers used are all based on a _Debian Jessie-Slim_ distribution, and are the following:
+The whole infrastructure for the attack, both the Mirai components and its targets are *Docker containers* and built with *Docker-Compose*. This allows us to have a better control over the internal network of containers, and even perform off-line attacks. The containers used are all based on a _Debian Jessie-Slim_ distribution, and are the following:
 
 - 1 **CNC**, the CommandAndControl server, which also holds the database
 - 1 **SCANLISTEN** server, to receive the reports from the bots
@@ -436,6 +478,7 @@ Mirai is a game changer. It changed the way DDoS attacks are launched, as well a
 Many security experts are arguing about Mirai's longevity, some even saying to "*let it die by itself*". Even if Mirai were to disappear in the next months, up to 53 unique strands of Mirai have been found *in the wild* just in the two months following the source code release, each with different improvements, from changing the targeted port exploiting other infection vectors to using Domain Generation Algorithm (DGA) to evade domain blacklisting.
 
 Since IoT devices will only grow in the coming years, IoT security is something to pay close attention to.
+Some possible solutions for preventing attacks are strengthening IoT password security and removing WAN access on IoT devices, in order to make botnet expansion significantly more difficult, even if they are not always feasible. Another idea is increasing network capacity (having greater capacity than is really needed), which provides redundancy in case of a DDoS.
 
 ----------
 
@@ -456,3 +499,5 @@ H. Sinanovi´c, S. Mrdovic, “Analysis of Mirai Malicious Software”, Universi
 N. B. Said, F. Biondi, V. Bontchev, O. Decourbe,T. Given-Wilson, A. Legay, J. Quilbeuf,“Detection of Mirai by Syntactic and Semantic Analysis”, HAL Id: hal-01629040, https://hal.inria.fr/hal-01629040, 5 Nov 2017
 
 B. Botticelli, “IoT Honeypots: State of the Art”, Seminar in Advanced Topics in Computer Science, Università di Roma Sapienza, September 2, 2017
+
+M. Bestavros, B. S. T. Chong, T. Hou, F. Vargus, “The Mirai Botnet”, Network Security News,Feb 12, 2017
